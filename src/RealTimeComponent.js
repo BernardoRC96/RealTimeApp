@@ -13,8 +13,6 @@ const generateTokenId = () => {
 
 const socket = io('http://localhost:5000', {
   transports: ['websocket'], // Ensure WebSocket transport is used
-  connecterror
-  
 });
 
 const RealTimeComponent = () => {

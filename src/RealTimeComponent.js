@@ -11,25 +11,28 @@ const generateTokenId = () => {
   return tokenId;
 };
 
-const socket = io('http://localhost:5000', {
-  transports: ['websocket'], // Ensure WebSocket transport is used
-});
+const token = generateTokenId();
 
 const RealTimeComponent = () => {
   const [message, setMessage] = useState('');
-  const [recipient, setRecipient] = useState('');
   const [messages, setMessages] = useState([]);
+  const [token_id, setTokenId] = useState('');
+
+  let socket = io('http://localhost:5000');
 
   useEffect(() => {
-    const token_id = generateTokenId(); // Generate a unique token_id for the user
-    console.log('Generated token_id:', token_id); // Debug log to verify token generation
+
+    socket = io('http://localhost:5000');
+    
+    setTokenId(token); // Generate a unique token_id for the user
+    console.log('Generated token_id:',token); // Debug log to verify token generation
 
     socket.on('connect', () => {
       console.log('Connected to WebSocket server');
       
       // Register with the server using the generated token_id
-      socket.emit('register', { token_id });
-      console.log(`Registered with token_id: ${token_id}`);
+      socket.emit('register', { token_id:token });
+      console.log(`Registered with token_id: ${token}`);
     });
     
     // Listen for private messages
@@ -38,10 +41,10 @@ const RealTimeComponent = () => {
     });
     
     // Send a private message to another user by their token_id
-    socket.emit("private_message", {
-        token_id: token_id,
-        message: "Hello, Target User!",
-    });
+    //socket.emit("private_message", {
+    //    token_id: token,
+    //    message: "Hello, Target User!",
+    //});
 
     /*socket.on('message', (msg) => {
       console.log('Message received from server:', msg);
@@ -67,13 +70,10 @@ const RealTimeComponent = () => {
 
   const sendMessage = () => {
     if (message.trim() !== '') {
-      if (recipient.trim() !== '') {
-        socket.emit('private_message', { recipient_sid: recipient, message });
-        console.log(`Sent private message to ${recipient}: ${message}`);
-      } else {
-        socket.emit('message', message);
-        console.log(`Broadcasted message: ${message}`);
-      }
+      
+      socket.emit('private_message', { token_id:token_id, message:message });
+      console.log(`Sent private message with token id ${token_id} and message: ${message}`);
+      
       setMessage('');
     }
   };

@@ -10,11 +10,15 @@ user_sockets = {}
 @socketio.on("connect")
 def handle_connect():
     print(f"Client connected: {request.sid}")
+    #emit("connect", to=request.sid)
  
 @socketio.on("register")
 def handle_register(data):
     """Register user with token_id."""
     token_id = data.get("token_id")
+
+    print(f"Received register request with token id: {token_id}")
+
     if token_id:
         user_sockets[token_id] = request.sid  # Map token_id to the socket ID
         print(f"Registered token_id {token_id} with SID {request.sid}")
@@ -27,11 +31,14 @@ def handle_private_message(data):
     """Send private message to a specific user based on token_id."""
     target_token_id = data.get("token_id")
     message = data.get("message")
+    print(f"received private message, from sid: {request.sid}")
  
     if target_token_id in user_sockets:
         target_sid = user_sockets[target_token_id]
+        print(f"found target_sid: {target_sid}")
         emit("message", {"message": message}, to=target_sid)
     else:
+        print("received private message without token id")
         emit("error", {"message": "Recipient not connected"}, to=request.sid)
  
 @socketio.on("disconnect")
